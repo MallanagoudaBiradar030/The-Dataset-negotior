@@ -39,13 +39,17 @@ def understand(description: str) -> TaskRequirements:
         r"\b(?:features?|inputs?)\s+(?:such as|like|including|are|:)\s+([^.;]+)",
         text,
     )
-    if not feature_match:
-        feature_match = re.search(
-            r"\busing\s+(.+?)(?=\s+(?:to\s+(?:predict|classify|forecast)|for\s+(?:regression|classification|clustering|forecasting))|[.;]|$)",
-            text,
-        )
+    feature_text = feature_match.group(1) if feature_match else None
+    if feature_text is None:
+        using_match = re.search(r"\busing\s+", text)
+        if using_match:
+            feature_text = re.split(
+                r"\s+(?:to\s+(?:predict|classify|forecast)|for\s+(?:regression|classification|clustering|forecasting))|[.;]",
+                text[using_match.end():],
+                maxsplit=1,
+            )[0]
     features = []
-    if feature_match:
+    if feature_text:
         excluded = {
             "classification", "classifier", "clustering", "computer vision",
             "forecasting", "natural language processing", "regression",
@@ -53,7 +57,7 @@ def understand(description: str) -> TaskRequirements:
         }
         features = [
             feature.strip(" -")
-            for feature in re.split(r",|\band\b", feature_match.group(1))
+            for feature in re.split(r",|\band\b", feature_text)
             if feature.strip(" -") and feature.strip(" -") not in excluded
         ]
     words = re.findall(r"[a-z0-9][a-z0-9_-]*", text)

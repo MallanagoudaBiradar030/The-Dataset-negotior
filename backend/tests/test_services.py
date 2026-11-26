@@ -47,6 +47,20 @@ def test_filtering_only_returns_matching_source():
     assert filtered[0].source == DatasetSource.UCI
 
 
+def test_availability_filter_matches_kaggle_download_support():
+    kaggle_data = dataset(
+        id="kaggle:owner/sample",
+        source=DatasetSource.KAGGLE,
+        download_url=None,
+    )
+    filtered = filter_datasets(
+        [kaggle_data],
+        {"availability": ["download"]},
+        understand("classification"),
+    )
+    assert filtered == [kaggle_data]
+
+
 def test_quality_and_compatibility_disclose_metadata_limits():
     item = dataset(description=None, license=None)
     assessment = analyze(item)

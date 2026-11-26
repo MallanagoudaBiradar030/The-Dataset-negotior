@@ -24,9 +24,13 @@ async def search(query: str, limit: int) -> list[Dataset]:
             features = [features]
         elif isinstance(features, dict):
             features = list(features)
-        elif features and isinstance(features[0], dict):
-            features = [feature.get("name", "") for feature in features if feature.get("name")]
-        elif not isinstance(features, list):
+        elif isinstance(features, list):
+            features = [
+                feature if isinstance(feature, str) else feature.get("name", "")
+                for feature in features
+                if isinstance(feature, str) or isinstance(feature, dict)
+            ]
+        else:
             features = []
         task_types = card.get("task_categories") or []
         if isinstance(task_types, str):

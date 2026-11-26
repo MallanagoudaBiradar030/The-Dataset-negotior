@@ -65,6 +65,17 @@ def test_huggingface_string_feature_metadata_is_normalized(monkeypatch):
     assert result[0].features == ["text"]
 
 
+def test_huggingface_mixed_feature_metadata_is_normalized(monkeypatch):
+    fake_client(monkeypatch, huggingface, [{
+        "id": "owner/sample",
+        "cardData": {"features": [{"name": "text"}, "label"]},
+    }])
+
+    result = asyncio.run(huggingface.search("sample", 5))
+
+    assert result[0].features == ["text", "label"]
+
+
 def test_kaggle_search_requires_configured_credentials(monkeypatch):
     monkeypatch.setattr(kaggle, "KAGGLE_USERNAME", None)
     monkeypatch.setattr(kaggle, "KAGGLE_KEY", None)

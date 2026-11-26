@@ -16,5 +16,8 @@ def filter_datasets(datasets: list[Dataset], filters: dict[str, list[str]], requ
         elif key == "data_type":
             filtered = [item for item in filtered if (item.data_type or "").casefold() in normalized]
         elif key == "availability":
-            filtered = [item for item in filtered if ("download" if item.download_url else "view") in normalized]
+            filtered = [
+                item for item in filtered
+                if ("download" if item.download_url or item.source.value == "Kaggle" else "view") in normalized
+            ]
     return filtered

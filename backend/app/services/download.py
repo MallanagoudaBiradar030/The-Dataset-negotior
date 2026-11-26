@@ -45,6 +45,9 @@ async def download(dataset: Dataset) -> StreamingResponse:
                 raise HTTPException(502, "Provider redirected to an unsupported download host.")
             await upstream.aclose()
             upstream = await client.send(client.build_request("GET", redirected_url), stream=True)
+        if upstream.status_code in {301, 302, 303, 307, 308}:
+            await upstream.aclose()
+            raise HTTPException(502, "Provider redirected too many times.")
         upstream.raise_for_status()
     except HTTPException:
         await client.aclose()
