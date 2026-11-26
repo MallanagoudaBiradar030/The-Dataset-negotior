@@ -43,11 +43,15 @@ def understand(description: str) -> TaskRequirements:
     if feature_text is None:
         using_match = re.search(r"\busing\s+", text)
         if using_match:
-            feature_text = re.split(
-                r"\s+(?:to\s+(?:predict|classify|forecast)|for\s+(?:regression|classification|clustering|forecasting))|[.;]",
-                text[using_match.end():],
-                maxsplit=1,
-            )[0]
+            remaining = text[using_match.end():]
+            stop_markers = (
+                " to predict", " to classify", " to forecast",
+                " for regression", " for classification", " for clustering",
+                " for forecasting", ".", ";",
+            )
+            stops = [remaining.find(marker) for marker in stop_markers]
+            stop = min((position for position in stops if position >= 0), default=len(remaining))
+            feature_text = remaining[:stop]
     features = []
     if feature_text:
         excluded = {
